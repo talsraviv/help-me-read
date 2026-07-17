@@ -134,8 +134,8 @@ report and continue with pasted items only.
    re-fetch or re-judge them.
 3. Read the email bodies in ONE sub-agent, never in the main loop —
    newsletter bodies run 90–140KB each and would swamp the context that
-   still has overviews to coordinate. A fast/cheap model (Haiku-class) is
-   fine: this is link-picking, not writing. Dispatch a single sub-agent with
+   still has overviews to coordinate. A fast/cheap model is fine: this is
+   link-picking, not writing. Dispatch a single sub-agent with
    the new threads' `{threadId, subject}` list and this task: *"For each
    thread, call the Gmail MCP `get_thread`. When the result is saved to a
    file (the usual case for newsletters), run*
@@ -289,8 +289,8 @@ The brief is self-contained: whoever reads it needs no other context.
 - **Single new item:** read the brief yourself, write the overview, and save
   the raw JSON object (exactly the shape the brief's schema section shows) to
   `<scratch>/overview-N.json`.
-- **Batch (more than one):** dispatch one sub-agent per item, same top model
-  (Opus class), in parallel. Each sub-agent's entire task: *"Read
+- **Batch (more than one):** dispatch one sub-agent per item, on your
+  strongest writing model, in parallel. Each sub-agent's entire task: *"Read
   `<scratch>/brief-N.md` and follow it. Write the overview for this item.
   Save your output — one raw JSON object, no fences, exactly the schema in
   the brief — to `<scratch>/overview-N.json` with the Write tool. Reply with

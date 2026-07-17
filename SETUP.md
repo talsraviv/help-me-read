@@ -1,22 +1,26 @@
 # Setup — running help-me-read on a new machine
 
-This repo IS the `help-me-read` Claude skill. The skill is installed by
-symlinking the repo into Claude's skills directory. Your personal library —
+This repo IS the `help-me-read` skill. Installing it means putting the repo
+where your coding agent looks for skills — either cloned directly into the
+skills directory, or cloned elsewhere and symlinked in. Your personal
+library —
 one JSON file per item under `data/items/`, plus frame images under
 `data/assets/` — is gitignored by this repo and can optionally be its own
 private git repo, kept in sync across machines through its own remote.
 
 ## New machine — one-time bootstrap
 
-    # 1. Clone the repo (any path; ~/help-me-read is fine)
-    git clone https://github.com/<you>/help-me-read.git ~/help-me-read
+    # Simplest: clone straight into your agent's skills directory
+    git clone https://github.com/<you>/help-me-read.git ~/.claude/skills/help-me-read
 
-    # 2. Point the skill symlink at the clone so Claude finds it from anywhere
-    ln -s ~/help-me-read ~/.claude/skills/help-me-read
+    # …or, to keep the code with your other projects (nicer for hacking on it),
+    # clone anywhere and symlink it in — the skill works identically:
+    #   git clone https://github.com/<you>/help-me-read.git ~/help-me-read
+    #   ln -s ~/help-me-read ~/.claude/skills/help-me-read
 
-    # 3. Invoke the skill in Claude — the first run walks you through the rest
-    #    (dependency check, picking your site's address, optional Gmail label,
-    #    optional private backup of your library)
+    # Then invoke the skill in your agent — the first run walks you through the
+    # rest (dependency check, picking your site's address, optional Gmail
+    # label, optional private backup of your library)
 
 If you already back your library up to a private data repo, also restore it:
 

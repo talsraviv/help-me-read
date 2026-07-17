@@ -1,8 +1,8 @@
 # help me read
 
-A [Claude Code](https://claude.com/claude-code) skill that turns links you
-paste — YouTube videos, blog posts, newsletter essays — into a beautiful
-personal reading site, deployed to your own fixed URL.
+A coding-agent skill that turns links you paste — YouTube videos, blog
+posts, newsletter essays — into a beautiful personal reading site, deployed
+to your own fixed URL. Works with any agent harness that supports skills.
 
 Paste a link (or ten). The skill fetches the transcript or article, writes an
 analytical overview with verified quotes and figures, adds it to your
@@ -16,21 +16,27 @@ emails.
 
 ## Quickstart
 
-The easiest way: paste this to Claude Code (or any coding agent):
+The easiest way: paste this to your coding agent:
 
 > Set this up for me: https://github.com/talsraviv/help-me-read
 
 Your agent will clone it, install the skill, and walk you through the couple
 of things only you can do (about two minutes). Prefer to do it by hand?
+Installing is just cloning into your agent's skills directory:
 
 ```bash
-# 1. Clone
+git clone https://github.com/talsraviv/help-me-read.git ~/.claude/skills/help-me-read
+```
+
+Then paste a YouTube link to your agent and say "help me read this".
+
+Planning to customize the skill, or keep your own fork evolving? Clone it
+wherever you keep projects and symlink it in instead — it works identically,
+and the code lives where you like to edit:
+
+```bash
 git clone https://github.com/talsraviv/help-me-read.git ~/help-me-read
-
-# 2. Install the skill (a symlink into Claude's skills directory)
 ln -s ~/help-me-read ~/.claude/skills/help-me-read
-
-# 3. In Claude Code, paste a YouTube link and say "help me read this"
 ```
 
 Either way, the first run detects a fresh install and walks you through
@@ -43,10 +49,11 @@ deployed site.
 
 If you're an AI agent and your user asked you to set this up:
 
-1. Clone this repo to a stable path (e.g. `~/help-me-read` — avoid
-   Dropbox/iCloud-synced folders) and symlink it into the skills directory:
-   `ln -s ~/help-me-read ~/.claude/skills/help-me-read` (adapt the target
-   for your harness's skills location).
+1. Clone this repo straight into the skills directory
+   (`git clone https://github.com/talsraviv/help-me-read.git ~/.claude/skills/help-me-read`,
+   adapting the path to your harness). If your user wants to customize the
+   skill, clone it where they keep projects and symlink it in instead.
+   Avoid Dropbox/iCloud-synced folders — file sync can corrupt `.git`.
 2. Run `bash ~/help-me-read/scripts/doctor.sh` — it prints a JSON report of
    required and optional dependencies plus config state. Help your user
    install whatever is missing.
@@ -96,8 +103,8 @@ The public machinery and your personal content are strictly separated:
 
 ## Requirements
 
-- [Claude Code](https://claude.com/claude-code) (or any Claude harness that
-  runs skills)
+- A coding agent harness that supports skills (and MCP, for the optional
+  Gmail queue)
 - `python3`, `yt-dlp`, `node`/`npx` — checked by `scripts/doctor.sh`, guided
   by the first-run setup
 - Optional: Pillow (frame thumbnails), Chrome (pre-deploy render check),
