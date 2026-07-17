@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Defense in depth behind the build's sanitizers: nothing on this page may
+     load or talk to any host except same-origin files, YouTube (player), and
+     https images (blog articles embed their own). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>help me read</title>
+<style>
+/*FONTS*/
+:root{ --bg:#f4f4f3; --ink:#333; --head:#1f1e1c; --accent:#cf5a3c; --line:#e4e2dd; --sub:#8a877f; }
+*{ box-sizing:border-box; }
+html,body{ margin:0; height:100%; background:var(--bg); color:var(--ink);
+  font-family:'Reader Serif',Georgia,serif; }
+.ui{ font-family:-apple-system,system-ui,sans-serif; }
+.app{ display:flex; height:100%; }
+.sidebar{ width:360px; flex:none; border-right:1px solid var(--line); overflow:auto; background:#fbfbfa; }
+.sidebar h1{ font-size:19px; margin:0; padding:18px 20px; color:var(--head);
+  border-bottom:1px solid var(--line); position:sticky; top:0; background:#fbfbfa; }
+.row{ display:flex; gap:12px; padding:14px 16px; border-bottom:1px solid var(--line); cursor:pointer; }
+.row:hover{ background:#f1f0ed; }
+.row.active{ background:#efe7df; }
+.row img{ width:96px; height:54px; object-fit:cover; border-radius:5px; flex:none; background:#eae6df; }
+.rmeta{ min-width:0; }
+.rtitle{ font-family:'Reader Serif',Georgia,serif; font-size:17px; line-height:1.25; color:var(--head);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.rsub{ font-family:-apple-system,system-ui,sans-serif; font-size:12px; color:var(--sub); margin-top:5px; }
+.reader{ flex:1; overflow:auto; }
+.wrap{ max-width:760px; margin:0 auto; padding:48px 32px 140px; }
+.back{ display:none; }
+.meta{ font-family:-apple-system,system-ui,sans-serif; color:var(--sub); font-size:14px; margin-bottom:14px; }
+.meta a{ color:var(--accent); text-decoration:none; }
+.share{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 26px; }
+.cbtn{ display:inline-flex; align-items:center; gap:6px; font-family:-apple-system,system-ui,sans-serif;
+  font-size:13px; font-weight:500; color:var(--sub); background:none; border:1px solid var(--line);
+  border-radius:999px; padding:6px 13px; cursor:pointer; text-decoration:none;
+  transition:color .12s, border-color .12s, background .12s; }
+.cbtn:hover{ color:var(--accent); border-color:#e0ddd6; }
+.cbtn.copied{ color:#4a7c59; border-color:#bcd3bf; background:#eaf1e8; }
+h2.title{ font-weight:700; font-size:40px; line-height:1.14; color:var(--head); margin:0 0 8px; }
+.hero{ width:100%; border-radius:10px; margin:18px 0 26px; border:1px solid var(--line); }
+.fig{ margin:4px 0 30px; }
+.fig svg{ width:100%; height:auto; max-height:420px; display:block; }
+.fig figcaption{ font-family:-apple-system,system-ui,sans-serif; font-size:13px;
+  color:var(--sub); margin-top:8px; }
+.nofig{ font-family:-apple-system,system-ui,sans-serif; font-size:13px; font-style:italic;
+  color:var(--sub); margin:30px 0 0; }
+.demos{ margin:0 0 8px; }
+.demos h3.sec{ margin-top:26px; }
+.demo{ margin:0 0 20px; }
+.dhead{ font-family:-apple-system,system-ui,sans-serif; font-size:15px; font-weight:600;
+  color:var(--head); display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:9px; }
+.dstrip{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }
+.dstrip img{ width:190px; aspect-ratio:16/9; object-fit:cover; border-radius:7px;
+  border:1px solid var(--line); cursor:pointer; flex:none; transition:border-color .12s; }
+.dstrip img:hover{ border-color:var(--accent); }
+h3.sec{ font-family:-apple-system,system-ui,sans-serif; letter-spacing:-.01em;
+  font-size:26px; color:var(--head); font-weight:700; margin:44px 0 14px; }
+p{ font-size:21px; line-height:32px; margin:0 0 18px; }
+blockquote{ margin:0 0 16px; padding:2px 0 2px 18px; border-left:3px solid #e7d8cc; }
+blockquote p{ margin:0 0 8px; font-size:16px; font-style:italic; line-height:1.5; color:#5a574f; }
+.chip{ display:inline-flex; align-items:center; gap:5px; cursor:pointer; font-family:-apple-system,system-ui,sans-serif;
+  font-weight:500; font-size:13px; color:var(--sub); background:none; border:1px solid var(--line);
+  border-radius:999px; padding:3px 10px; margin-right:8px; transition:color .12s, border-color .12s; }
+.chip:hover{ color:var(--accent); border-color:#e0ddd6; }
+.jump{ font-family:-apple-system,system-ui,sans-serif; font-size:13px; color:var(--sub);
+  cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+details{ margin-top:30px; } summary{ font-family:-apple-system,system-ui,sans-serif; color:var(--sub); cursor:pointer; }
+.article img{ max-width:100%; height:auto; border-radius:8px; }
+.article a{ color:var(--accent); text-decoration:none; }
+.article a:hover{ text-decoration:underline; text-underline-offset:2px; }
+.article h2,.article h3,.article h4{ font-family:'Reader Serif',Georgia,serif;
+  color:var(--head); font-weight:700; margin:34px 0 12px; line-height:1.2; }
+.article h2{ font-size:28px; } .article h3{ font-size:23px; } .article h4{ font-size:21px; }
+.article ul,.article ol{ font-size:21px; line-height:32px; margin:0 0 18px; padding-left:28px; }
+.article li{ margin-bottom:6px; }
+.article pre{ background:#eceae5; border-radius:8px; padding:14px 16px; overflow-x:auto;
+  font-size:14px; line-height:1.5; margin:0 0 18px; }
+.article code{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.85em;
+  background:#eceae5; padding:1px 5px; border-radius:4px; }
+.article pre code{ background:none; padding:0; font-size:inherit; }
+.article blockquote p{ font-size:19px; }
+.article hr{ border:none; border-top:1px solid var(--line); margin:28px 0; }
+.article figure{ margin:0 0 18px; }
+.article figcaption{ font-family:-apple-system,system-ui,sans-serif; font-size:13px; color:var(--sub); margin-top:6px; }
+.article table{ display:block; overflow-x:auto; border-collapse:collapse;
+  font-family:-apple-system,system-ui,sans-serif; font-size:15px; margin:0 0 18px; }
+.article th,.article td{ border:1px solid var(--line); padding:6px 10px; text-align:left; }
+.article .flash, .article p.flash{ animation:flashbg 1.8s ease-out; }
+@keyframes flashbg{ 0%,35%{ background:#f3dccb; } 100%{ background:transparent; } }
+.artwrap{ margin-top:44px; }
+.artwrap summary{ font-family:-apple-system,system-ui,sans-serif; letter-spacing:-.01em;
+  font-size:26px; color:var(--head); font-weight:700; cursor:pointer; list-style:none; }
+.artwrap summary::-webkit-details-marker{ display:none; }
+.artwrap summary::before{ content:'▸'; color:var(--accent); font-size:20px; margin-right:10px; }
+.artwrap[open] summary::before{ content:'▾'; }
+.artwrap summary .ahint{ font-size:14px; font-weight:400; color:var(--sub); margin-left:10px; }
+.artwrap .article{ margin-top:14px; }
+.title a{ color:inherit; text-decoration:none; }
+.title a:hover{ color:var(--accent); }
+.empty{ padding:80px 20px; text-align:center; color:var(--sub); font-family:-apple-system,system-ui,sans-serif; }
+.status{ font-family:-apple-system,system-ui,sans-serif; font-size:13px; border-bottom:1px solid var(--line); }
+.status .bar{ display:flex; align-items:center; gap:8px; padding:11px 16px; }
+.status.warn .bar{ background:#fbeadf; }
+.status.ok .bar{ background:#eaf1e8; }
+.status .dot{ font-weight:700; }
+.status.warn .dot{ color:var(--accent); }
+.status.ok .dot{ color:#4a7c59; }
+.status .msg{ color:var(--head); flex:1; font-weight:600; }
+.status .when{ color:var(--sub); }
+.status .x{ color:var(--sub); cursor:pointer; border:none; background:none; font-size:16px; line-height:1; padding:0 2px; }
+.status .fails{ display:none; padding:2px 12px 12px; }
+.status.warn .fails{ display:block; }
+.fail{ display:flex; gap:9px; padding:9px 11px; margin-top:8px; border:1px dashed #e0b9ac;
+  border-radius:7px; background:#fff; }
+.fail .wi{ color:var(--accent); font-weight:700; flex:none; }
+.fail .fm{ min-width:0; }
+.fail .fin{ color:var(--head); font-weight:600; word-break:break-word; }
+.fail .fr{ color:var(--sub); margin-top:2px; }
+#player{ position:fixed; right:16px; bottom:16px; width:400px; max-width:calc(100vw - 32px);
+  background:#1f1e1c; border-radius:10px; overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.3); display:none; z-index:50; }
+#player.show{ display:block; }
+#player .phead{ display:flex; align-items:center; gap:6px; padding:6px 8px; background:#1f1e1c; }
+.ptab{ font-family:-apple-system,system-ui,sans-serif; font-size:12px; font-weight:600; color:#bdb9b0;
+  background:none; border:none; cursor:pointer; padding:5px 12px; border-radius:6px; }
+.ptab.on{ background:#3a3833; color:#fff; }
+#player .close{ margin-left:auto; width:24px; height:24px; border-radius:6px;
+  background:none; color:#bdb9b0; border:none; cursor:pointer; font-size:16px; line-height:1; }
+#player .close:hover{ background:#3a3833; color:#fff; }
+#pbody{ position:relative; width:100%; aspect-ratio:16/9; background:#000; }
+#pvideo{ position:absolute; inset:0; }
+#ytframe{ width:100%; height:100%; border:0; }
+#ptranscript{ position:absolute; inset:0; overflow:auto; background:var(--bg);
+  padding:8px 12px; display:none; }
+#player.mode-transcript #ptranscript{ display:block; }
+#ptranscript .tline{ font-size:15px; line-height:1.45; padding:3px 6px; border-radius:4px; cursor:pointer; }
+#ptranscript .tline .t{ font-family:-apple-system,system-ui,sans-serif; font-size:11px; color:var(--sub);
+  margin-right:8px; font-variant-numeric:tabular-nums; }
+#ptranscript .tline.spk{ margin-top:12px; }
+#ptranscript .tline.now{ background:#efe4d9; }
+#pchapters{ position:absolute; inset:0; overflow:auto; background:var(--bg);
+  padding:6px 6px; display:none; }
+#player.mode-chapters #pchapters{ display:block; }
+#pchapters .crow{ font-family:-apple-system,system-ui,sans-serif; font-size:14px; line-height:1.35;
+  padding:8px 10px; border-radius:5px; cursor:pointer; color:var(--head); }
+#pchapters .crow:hover{ background:#efe4d9; }
+#pchapters .crow .t{ color:var(--accent); font-variant-numeric:tabular-nums; margin-right:10px; font-size:12px; }
+#pchapters .crow.now{ background:#efe4d9; }
+/* Solo / share view: one item, no sidebar or cross-nav. */
+body.solo .sidebar{ display:none; }
+body.solo .reader{ display:block; }
+body.solo .back{ display:none; }
+@media (max-width:820px){
+  .sidebar{ width:100%; }
+  .reader{ display:none; }
+  body.reading .sidebar{ display:none; }
+  body.reading .reader{ display:block; }
+  .wrap{ padding:20px 18px 140px; }
+  h2.title{ font-size:30px; }
+  .back{ display:inline-flex; align-items:center; gap:6px; font-family:-apple-system,system-ui,sans-serif;
+    color:var(--accent); background:none; border:none; font-size:16px; cursor:pointer; padding:0 0 14px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar"><h1 class="ui">help me read</h1><div id="status"></div><div id="list"></div></aside>
+  <main class="reader"><div class="wrap" id="reader"><div class="empty">Pick something on the left.</div></div></main>
+</div>
+<div id="player">
+  <div class="phead">
+    <button class="ptab" data-mode="video">Video</button>
+    <button class="ptab" data-mode="chapters">Chapters</button>
+    <button class="ptab" data-mode="transcript">Transcript</button>
+    <button class="close" onclick="hidePlayer()" title="close">×</button>
+  </div>
+  <div id="pbody">
+    <div id="pvideo"><div id="ytframe"></div></div>
+    <div id="pchapters"></div>
+    <div id="ptranscript"></div>
+  </div>
+</div>
+
+<script id="items-data" type="application/json">[]</script>
+<script id="run-status" type="application/json">null</script>
+<script>
+const ITEMS = JSON.parse(document.getElementById('items-data').textContent || '[]');
+const RUN_STATUS = JSON.parse(document.getElementById('run-status').textContent || 'null');
+// A "#/s/<id>" hash turns the (single) page into a focused share view: same file,
+// sidebar hidden, just that one item. No security — anyone can drop the hash and
+// see everything — it's only for keeping a recipient focused on the one thing.
+function soloIdFromHash(){ const m = (location.hash||'').match(/^#\/s\/(.+)$/); return m ? decodeURIComponent(m[1]) : null; }
+// Soft, on-brand placeholder for missing/broken thumbnails (a muted play glyph
+// on warm paper). Used both as the initial src when there's no thumbnail and as
+// the onerror fallback when a thumbnail URL fails to load.
+const PH = 'data:image/svg+xml,' + encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90'>" +
+  "<rect width='160' height='90' fill='#eae6df'/>" +
+  "<circle cx='80' cy='45' r='17' fill='none' stroke='#c3bdb1' stroke-width='2.5'/>" +
+  "<path d='M75 36.5 L75 53.5 L89 45 Z' fill='#c3bdb1'/></svg>");
+// Same idea for articles: a muted page-with-text glyph instead of a play button.
+const PH_DOC = 'data:image/svg+xml,' + encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90'>" +
+  "<rect width='160' height='90' fill='#eae6df'/>" +
+  "<rect x='57' y='20' width='46' height='50' rx='4' fill='none' stroke='#c3bdb1' stroke-width='2.5'/>" +
+  "<line x1='65' y1='33' x2='95' y2='33' stroke='#c3bdb1' stroke-width='2.5'/>" +
+  "<line x1='65' y1='43' x2='95' y2='43' stroke='#c3bdb1' stroke-width='2.5'/>" +
+  "<line x1='65' y1='53' x2='84' y2='53' stroke='#c3bdb1' stroke-width='2.5'/></svg>");
+function thumbAttrs(url, type){ const ph = type === 'blog' ? 'PH_DOC' : 'PH';
+  return `src="${url ? esc(url) : (type === 'blog' ? PH_DOC : PH)}" onerror="this.onerror=null;this.src=${ph}" loading="lazy"`; }
+let currentItem = null, ytPlayer = null, ytReady = false, pending = null, syncTimer = null, holdScroll = 0;
+
+// Heavy fields (transcript, article html) live in per-item files fetched on
+// demand, so the index page stays light no matter how big the archive grows.
+// loadHeavy merges the payload into the item in place; downstream code then
+// sees the same shape it always did. Failures (offline, file://) mark the
+// item so the UI can say so instead of spinning.
+const HEAVY = {};
+function needsHeavy(it){ return !!(it.lazy && (it.lazy.transcript || it.lazy.article) && !it._heavyLoaded); }
+function loadHeavy(it){
+  if(!needsHeavy(it)) return Promise.resolve(it);
+  if(HEAVY[it.id]) return HEAVY[it.id];
+  HEAVY[it.id] = fetch('items/' + encodeURIComponent(it.id) + '.json')
+    .then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(p => {
+      if(p.transcript) it.transcript = p.transcript;
+      if(p.article) it.article = Object.assign({}, it.article, p.article);
+      it._heavyLoaded = true; it._heavyError = false;
+      return it;
+    })
+    .catch(() => { delete HEAVY[it.id]; it._heavyError = true; return it; });
+  return HEAVY[it.id];
+}
+function hasTranscript(it){
+  return !!((it.lazy && it.lazy.transcript) ||
+            (it.transcript && it.transcript.segments && it.transcript.segments.length));
+}
+
+function esc(s){ return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmt(sec){ sec=Math.floor(sec||0); const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`; }
+
+function relTime(iso){
+  const t = Date.parse(iso||''); if(isNaN(t)) return '';
+  const s = Math.max(0, (Date.now()-t)/1000);
+  if(s < 60) return 'just now';
+  if(s < 3600) return Math.floor(s/60)+'m ago';
+  if(s < 86400) return Math.floor(s/3600)+'h ago';
+  return new Date(t).toLocaleDateString();
+}
+
+function renderStatus(){
+  const el = document.getElementById('status');
+  const st = RUN_STATUS;
+  const fails = (st && st.skipped) || [];
+  if(!st || !fails.length){ el.className=''; el.innerHTML=''; return; }
+  const msg = fails.length + " didn't work";
+  const failRows = fails.map(f => `<div class="fail"><span class="wi">⚠</span><div class="fm">
+      <div class="fin">${esc(f.input || f.title || '(unknown)')}</div>
+      ${f.resolved ? `<div class="fr">matched: ${esc(f.resolved)}</div>` : ''}
+      <div class="fr">${esc(f.reason || 'could not be added')}</div></div></div>`).join('');
+  el.className = 'status warn';
+  el.innerHTML = `<div class="bar">
+      <span class="dot">⚠</span>
+      <span class="msg">${msg}</span>
+      <span class="when">${esc(relTime(st.updated))}</span>
+      <button class="x" data-dismiss title="dismiss">×</button>
+    </div>
+    <div class="fails">${failRows}</div>`;
+}
+
+function renderList(){
+  const el = document.getElementById('list');
+  if(!ITEMS.length){ el.innerHTML = '<div class="empty">Nothing added yet.</div>'; return; }
+  el.innerHTML = ITEMS.map(it => `<div class="row" data-id="${esc(it.id)}">
+    <img ${thumbAttrs(it.thumbnail, it.type)} alt="">
+    <div class="rmeta"><div class="rtitle">${esc(it.title||'')}</div>
+    <div class="rsub">${esc(it.source||'')}${it.duration ? ' · '+esc(it.duration) : ''}</div></div></div>`).join('');
+}
+
+function blockHTML(b, it){
+  if(b.type === 'figure'){
+    return `<figure class="fig">${b.svg||''}${b.caption ? `<figcaption>${esc(b.caption)}</figcaption>` : ''}</figure>`;
+  }
+  if(b.type === 'quote'){
+    // Timestamped quotes (videos) get play/read-along; blog quotes get a jump
+    // that scrolls the full article to the quoted passage.
+    let aff = '';
+    if(b.start != null){
+      aff = `<span class="chip" data-play data-start="${b.start}">▶ ${fmt(b.start)}</span>
+        <span class="jump" data-jump data-start="${b.start}">read along</span>`;
+    } else if(it && it.type === 'blog'){
+      aff = `<span class="jump" data-find>find in article</span>`;
+    }
+    return `<blockquote><p>${esc(b.text)}</p>${aff}</blockquote>`;
+  }
+  return `<p>${esc(b.text)}</p>`;
+}
+
+function renderOverview(it){
+  const ov = it.overview; if(!ov) return '';
+  let html = '';
+  if(ov.no_figure && ov.no_figure.reason){
+    html += `<div class="nofig">No diagram — ${esc(ov.no_figure.reason)}</div>`;
+  }
+  (ov.sections||[]).forEach((s, i) => {
+    html += `<h3 class="sec">${esc(s.heading)}</h3>` + (s.blocks||[]).map(b => blockHTML(b, it)).join('');
+    if(i === 0) html += renderMoments(it);   // demos right after the main-contribution section
+  });
+  if(!(ov.sections||[]).length) html += renderMoments(it);
+  if(ov.qa && ov.qa.length){
+    html += `<h3 class="sec">q&a</h3>`;
+    ov.qa.forEach(qa => {
+      html += `<blockquote><p><strong>Q:</strong> ${esc(qa.question)}</p>` +
+        (qa.start!=null ? `<span class="chip" data-play data-start="${qa.start}">▶ ${fmt(qa.start)}</span>` : '') +
+        `</blockquote>` + (qa.answer||[]).map(b => blockHTML(b, it)).join('');
+    });
+  }
+  return html;
+}
+
+function renderMoments(it){
+  const ms = it.moments || []; if(!ms.length) return '';
+  return `<div class="demos"><h3 class="sec">demos</h3>` + ms.map(m => {
+    const frames = (m.frames||[]).map(f =>
+      `<img src="${esc(f.src)}" data-play data-start="${f.start||0}" alt="" title="jump to ${fmt(f.start)}">`).join('');
+    return `<div class="demo"><div class="dhead">${esc(m.title||'demo')}
+        <span class="chip" data-play data-start="${m.start||0}">▶ ${fmt(m.start)}–${fmt(m.end)}</span></div>
+      ${frames ? `<div class="dstrip">${frames}</div>` : ''}</div>`;
+  }).join('') + `</div>`;
+}
+
+let chaptersFor = null;
+function fillChaptersPanel(it){
+  if(chaptersFor === it.id) return;
+  chaptersFor = it.id;
+  const box = document.getElementById('pchapters');
+  box.innerHTML = (it.chapters || []).map(c =>
+    `<div class="crow" data-play data-start="${c.start}"><span class="t">${fmt(c.start)}</span>${esc(c.title)}</div>`).join('');
+}
+
+// Show only the tabs that have content for this item (Video is always shown).
+function updateTabs(it){
+  const has = { chapters: !!(it.chapters && it.chapters.length),
+                transcript: hasTranscript(it) };
+  document.querySelectorAll('.ptab[data-mode]').forEach(t => {
+    const m = t.dataset.mode;
+    if(m in has) t.style.display = has[m] ? '' : 'none';
+  });
+}
+
+let transcriptFor = null;
+function fillTranscriptPanel(it){
+  const box = document.getElementById('ptranscript');
+  const segs = (it.transcript && it.transcript.segments) || [];
+  if(transcriptFor === it.id){ return; }
+  if(!segs.length){
+    // Not loaded yet (or nothing to load) — show state, don't cache, so a
+    // later call after loadHeavy resolves can fill in the real lines.
+    box.innerHTML = '<div class="meta" style="padding:8px">' +
+      (needsHeavy(it) ? 'Loading transcript…'
+        : it._heavyError ? 'Transcript could not be loaded here.' : 'No transcript.') + '</div>';
+    return;
+  }
+  transcriptFor = it.id;
+  box.innerHTML = segs.map(s =>
+    `<div class="tline${s.speaker ? ' spk':''}" data-start="${s.start}"><span class="t">${fmt(s.start)}</span>${esc(s.text)}</div>`).join('');
+}
+
+function renderDescription(it){
+  const d = it.description; if(!d || (!d.summary && !d.full)) return '';
+  return `<h3 class="sec">official description</h3>` +
+    (d.summary ? `<p>${esc(d.summary)}</p>` : '') +
+    (d.full ? `<details><summary>full description</summary><p class="ui" style="font-size:15px;line-height:1.6;white-space:pre-wrap">${esc(d.full)}</p></details>` : '');
+}
+
+function renderReader(it){
+  const isBlog = it.type === 'blog';
+  return `<button class="back" onclick="closeReader()">‹ back</button>
+    <div class="meta ui">${esc(it.source||'')}${it.duration ? ' · '+esc(it.duration):''}${it.published ? ' · '+esc(it.published):''}</div>
+    <h2 class="title">${isBlog ? `<a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.title||'')}</a>` : esc(it.title||'')}</h2>
+    <div class="share ui">
+      <button class="cbtn" data-copy="${esc(shareURL(it))}">🔗 Copy share link</button>
+      <button class="cbtn" data-copy="${esc(it.url)}">⧉ Copy original link</button>
+      <a class="cbtn" href="${esc(it.url)}" target="_blank" rel="noopener">${isBlog ? 'Open original' : 'Watch on YouTube'} ↗</a>
+    </div>
+    ${it.thumbnail || !isBlog ? `<img class="hero" ${thumbAttrs(it.thumbnail, it.type)} alt="">` : ''}
+    ${isBlog ? '' : renderDescription(it)}
+    ${it.overview ? renderOverview(it) : renderMoments(it)}
+    ${isBlog && it.article ? `<details class="artwrap"><summary>full article${it.duration ? `<span class="ahint">${esc(it.duration)}</span>` : ''}</summary><div class="article">${it.article.html || '<p class="ui" style="font-size:15px;color:var(--sub)">Loading article…</p>'}</div></details>` : ''}`;
+}
+
+// Swap the article placeholder for the fetched html once the heavy payload
+// lands (only if the user is still on the same item).
+function fillArticle(it){
+  if(currentItem !== it) return;
+  const box = document.querySelector('.artwrap .article');
+  if(!box) return;
+  if(it.article && it.article.html){ box.innerHTML = it.article.html; }
+  else if(it._heavyError){
+    box.innerHTML = '<p class="ui" style="font-size:15px;color:var(--sub)">The article could not be loaded here — open the original instead.</p>';
+  }
+}
+
+// The shareable link is just this same page with a "#/s/<id>" hash, which the
+// reader reads on load to hide the sidebar and focus that one item.
+function shareURL(it){ return location.origin + location.pathname + '#/s/' + encodeURIComponent(it.id); }
+
+function copyText(text, btn){
+  const restore = () => {
+    const label = btn.dataset.label || btn.textContent;
+    btn.dataset.label = label;
+    btn.classList.add('copied'); btn.textContent = '✓ Copied';
+    clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = label; btn.classList.remove('copied'); }, 1500);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(restore).catch(() => fallbackCopy(text, restore));
+  } else { fallbackCopy(text, restore); }
+}
+function fallbackCopy(text, done){
+  const ta = document.createElement('textarea'); ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta); done();
+}
+
+function openItem(id){
+  const it = ITEMS.find(x => x.id === id); if(!it) return;
+  currentItem = it;
+  document.querySelectorAll('.row').forEach(r => r.classList.toggle('active', r.dataset.id === id));
+  document.body.classList.add('reading');
+  const r = document.getElementById('reader');
+  r.innerHTML = renderReader(it);
+  document.querySelector('.reader').scrollTop = 0;
+  // Kick off the heavy fetch as soon as an item is opened, so the article /
+  // transcript is usually ready before it's asked for.
+  if(needsHeavy(it)) loadHeavy(it).then(() => fillArticle(it));
+  // On phones, entering the reader gets its own history entry so the native
+  // edge-swipe-back gesture (and the back button) returns to the list instead
+  // of leaving the site. Solo views have no list to go back to.
+  if(mobileMQ.matches && !document.body.classList.contains('solo') && !readingPushed){
+    history.pushState({reading:true}, '');
+    readingPushed = true;
+  }
+}
+
+// 820px matches the CSS breakpoint where the list and reader become one column.
+const mobileMQ = window.matchMedia('(max-width:820px)');
+let readingPushed = false;   // we own a history entry for the current reading view
+function exitReading(){ document.body.classList.remove('reading'); readingPushed = false; }
+function closeReader(){
+  // If we pushed a history entry, close by popping it so history stays in
+  // step whether the user swipes, taps back, or uses the browser button.
+  if(readingPushed) history.back();
+  else exitReading();
+}
+window.addEventListener('popstate', () => { if(readingPushed) exitReading(); });
+
+function loadYT(){ if(window.YT && window.YT.Player){ ytReady = true; return; }
+  const t = document.createElement('script'); t.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(t); }
+window.onYouTubeIframeAPIReady = function(){ ytReady = true; if(pending){ const p = pending; pending = null; playAt(p.id, p.start); } };
+
+function setMode(mode){
+  const p = document.getElementById('player');
+  p.classList.remove('mode-video','mode-chapters','mode-transcript');
+  p.classList.add('mode-' + mode);
+  document.querySelectorAll('.ptab').forEach(t => t.classList.toggle('on', t.dataset.mode === mode));
+  if(mode === 'transcript'){ holdScroll = 0; syncScroll(true); }
+}
+function showPlayer(){ document.getElementById('player').classList.add('show'); }
+function hidePlayer(){
+  document.getElementById('player').classList.remove('show');
+  clearInterval(syncTimer); syncTimer = null;
+  if(ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+}
+
+// Default every video to 1.25x. loadVideoById resets the rate per video and
+// loads async, so we apply the default once per video as it starts playing
+// (keyed by video id) — this leaves any later manual rate change untouched.
+const DEFAULT_RATE = 1.25;
+let ratedVideo = null;
+function onPlayerState(e){
+  if(e.data !== YT.PlayerState.PLAYING) return;
+  const vid = ytPlayer.getVideoData && ytPlayer.getVideoData().video_id;
+  if(vid && vid !== ratedVideo){ ratedVideo = vid; try{ ytPlayer.setPlaybackRate(DEFAULT_RATE); }catch(err){} }
+}
+
+function playAt(videoId, start){
+  showPlayer();
+  if(currentItem){
+    const it = currentItem;
+    fillTranscriptPanel(it); fillChaptersPanel(it); updateTabs(it);
+    if(needsHeavy(it)) loadHeavy(it).then(() => {
+      if(currentItem === it){ fillTranscriptPanel(it); updateTabs(it); }
+    });
+  }
+  if(!ytReady){ pending = {id: videoId, start}; return; }
+  if(!ytPlayer){
+    ytPlayer = new YT.Player('ytframe', { videoId, playerVars:{autoplay:1, start:Math.floor(start), playsinline:1},
+      events:{ onReady: e => { e.target.seekTo(start, true); e.target.playVideo(); startSync(); },
+               onStateChange: onPlayerState } });
+  } else {
+    const cur = ytPlayer.getVideoData && ytPlayer.getVideoData().video_id;
+    if(cur !== videoId){ ytPlayer.loadVideoById({videoId, startSeconds: start}); }
+    else { ytPlayer.seekTo(start, true); ytPlayer.playVideo(); }
+    startSync();
+  }
+}
+
+// Highlight the current line and, only inside the transcript panel, keep it
+// centered. Scrolling is done by setting the panel's own scrollTop so it can
+// never move the main page (the old auto-scroll bug).
+function syncScroll(force){
+  if(!ytPlayer || !ytPlayer.getCurrentTime || !currentItem) return;
+  const t = ytPlayer.getCurrentTime();
+  // Highlight the chapter we're currently in (like the transcript's "now" line).
+  const chs = currentItem.chapters || [];
+  if(chs.length){
+    let ci = -1;
+    for(let i=0;i<chs.length;i++){ if(chs[i].start <= t) ci = i; else break; }
+    document.querySelectorAll('#pchapters .crow').forEach((el,i) => el.classList.toggle('now', i === ci));
+  }
+  const segs = (currentItem.transcript && currentItem.transcript.segments) || [];
+  if(!segs.length) return;
+  let idx = -1;
+  for(let i=0;i<segs.length;i++){ if(segs[i].start <= t) idx = i; else break; }
+  const box = document.getElementById('ptranscript');
+  const lines = box.querySelectorAll('.tline');
+  lines.forEach((el,i) => el.classList.toggle('now', i === idx));
+  const inTranscript = document.getElementById('player').classList.contains('mode-transcript');
+  if(idx >= 0 && (force || (inTranscript && Date.now() > holdScroll))){
+    const el = lines[idx];
+    if(el) box.scrollTop = el.offsetTop - box.clientHeight/2 + el.offsetHeight/2;
+  }
+}
+function startSync(){ clearInterval(syncTimer); syncTimer = setInterval(syncScroll, 700); }
+
+// Scroll the full article to the quoted passage and flash it. Curly/straight
+// quote and whitespace differences between the overview quote and the article
+// text are normalized away; matching on a prefix keeps long quotes findable.
+function normQuote(s){
+  return (s||'').toLowerCase().replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/\s+/g,' ').trim();
+}
+function findInArticle(quote){
+  const art = document.querySelector('.article'); if(!art) return;
+  const wrap = art.closest('details'); if(wrap) wrap.open = true;   // expand the collapsed article first
+  const needle = normQuote(quote).slice(0, 80); if(!needle) return;
+  for(const el of art.querySelectorAll('p,li,blockquote,h2,h3,h4,figcaption,pre')){
+    if(normQuote(el.textContent).includes(needle)){
+      el.classList.remove('flash'); void el.offsetWidth;
+      el.classList.add('flash');
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+  }
+}
+
+document.addEventListener('click', e => {
+  const cp = e.target.closest('[data-copy]'); if(cp){ copyText(cp.dataset.copy, cp); return; }
+  const dm = e.target.closest('[data-dismiss]'); if(dm){ const s=document.getElementById('status'); s.className=''; s.innerHTML=''; return; }
+  const find = e.target.closest('[data-find]');
+  if(find && currentItem){
+    const p = find.closest('blockquote')?.querySelector('p');
+    if(p){ const q = p.textContent;
+      loadHeavy(currentItem).then(it => { fillArticle(it); findInArticle(q); }); }
+    return; }
+  const row = e.target.closest('.row'); if(row){ openItem(row.dataset.id); return; }
+  const tab = e.target.closest('.ptab'); if(tab){ setMode(tab.dataset.mode); return; }
+  const play = e.target.closest('[data-play]'); if(play && currentItem){ playAt(currentItem.id, parseFloat(play.dataset.start)); setMode('video'); return; }
+  const jump = e.target.closest('[data-jump]'); if(jump && currentItem){ playAt(currentItem.id, parseFloat(jump.dataset.start)); setMode('transcript'); return; }
+  const line = e.target.closest('#ptranscript .tline'); if(line && currentItem){ holdScroll = Date.now() + 4000; playAt(currentItem.id, parseFloat(line.dataset.start)); return; }
+});
+// Pause auto-follow briefly when the user scrolls the transcript panel by hand.
+document.getElementById('ptranscript').addEventListener('scroll', () => { holdScroll = Date.now() + 4000; });
+
+// A decisive swipe-right anywhere in the article body goes back to the list
+// (phones only). Touches that start inside horizontally scrollable content —
+// demo strips, code blocks, tables — are theirs to scroll, not ours.
+const readerPane = document.querySelector('.reader');
+let swipeFrom = null;
+readerPane.addEventListener('touchstart', e => {
+  swipeFrom = null;
+  if(!mobileMQ.matches || !document.body.classList.contains('reading')
+     || document.body.classList.contains('solo')) return;
+  if(e.touches.length !== 1) return;
+  if(e.target.closest('.dstrip, pre, table')) return;
+  swipeFrom = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, {passive:true});
+readerPane.addEventListener('touchend', e => {
+  if(!swipeFrom) return;
+  const dx = e.changedTouches[0].clientX - swipeFrom.x;
+  const dy = e.changedTouches[0].clientY - swipeFrom.y;
+  swipeFrom = null;
+  // Mostly-horizontal and rightward: far enough to be deliberate, flat enough
+  // not to fire off an ordinary reading scroll.
+  if(dx > 60 && Math.abs(dy) < 50 && dx > Math.abs(dy) * 2) closeReader();
+}, {passive:true});
+readerPane.addEventListener('touchcancel', () => { swipeFrom = null; }, {passive:true});
+
+// Focus one item (sidebar hidden) when the url carries a "#/s/<id>" hash;
+// otherwise show the normal reader. Runs on load and whenever the hash changes.
+function applyRoute(){
+  const id = soloIdFromHash();
+  const it = id && ITEMS.find(x => x.id === id);
+  if(it){
+    document.body.classList.add('solo');
+    document.title = (it.title || 'help me read') + ' · help me read';
+    openItem(it.id);
+  } else {
+    document.body.classList.remove('solo');
+    document.title = 'help me read';
+  }
+}
+
+renderStatus();
+renderList();
+applyRoute();
+window.addEventListener('hashchange', applyRoute);
+loadYT();
+</script>
+</body>
+</html>

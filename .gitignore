@@ -1,0 +1,16 @@
+.superpowers/
+node_modules/
+.DS_Store
+site/
+scratch/
+
+__pycache__/
+*.pyc
+
+# Personal, per-user state — never committed to the public machinery repo.
+# data/ is (optionally) its own private git repo; config values and local
+# font overrides are plain gitignored files with committed .example templates.
+data/
+config/surge-domain.txt
+config/gmail-label.txt
+assets/fonts-local/

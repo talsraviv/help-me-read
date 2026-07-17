@@ -1,0 +1,2 @@
+# Archive is one file per item under data/items/ — concurrent adds from
+# different machines merge natively (different files), no merge driver needed.
