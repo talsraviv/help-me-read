@@ -14,7 +14,7 @@ emails.
 
 ![the reader](docs/screenshot.png)
 
-## Quickstart
+## Getting set up
 
 The easiest way: paste this to your coding agent:
 
@@ -34,7 +34,11 @@ git clone https://github.com/talsraviv/help-me-read.git ~/.codex/skills/help-me-
 # other harnesses: clone into wherever yours discovers skills
 ```
 
-Then paste a YouTube link to your agent and say "help me read this".
+Then tell your agent:
+
+```
+/help-me-read [youtube url]
+```
 
 **Use more than one harness?** Clone once, then symlink the same folder into
 the other's skills directory — your reading library lives inside the clone,
@@ -56,8 +60,44 @@ ln -s ~/help-me-read ~/.claude/skills/help-me-read   # and/or ~/.codex/skills/�
 Either way, the first run detects a fresh install and walks you through
 everything else: checking dependencies (`python3`, `yt-dlp`, `node`), picking
 your site's address (a free `*.surge.sh` subdomain), and the optional extras.
-After that, every invocation is fully autonomous — paste links, get a
-deployed site.
+After that, every invocation is fully autonomous.
+
+## Ongoing use
+
+Three ways to feed the reader — mix and match:
+
+**Paste links.** One or a dozen at a time — YouTube videos, blog posts,
+newsletter essays, even a bare talk title (it finds the video):
+
+```
+/help-me-read https://www.youtube.com/watch?v=…  https://some.blog/post
+```
+
+Each becomes a page with an analytical overview, verified quotes, and the
+full transcript or article; the site redeploys automatically.
+
+**Label emails in Gmail.** During setup you can create a Gmail label called
+`help-me-read`. From then on, whenever an email points at something you want
+to read — a Substack newsletter, a podcast announcement, a talk link — just
+apply that label and archive the email. The next run picks it up, figures
+out what content the email points to, and adds it. Draining the queue takes
+nothing more than the bare skill name:
+
+```
+/help-me-read
+```
+
+**Schedule it.** Because bare `/help-me-read` is a complete instruction,
+it works as a scheduled task: have your harness run it once a day and your
+labeled emails flow onto your site without you ever invoking anything. The
+entire prompt of the scheduled task is literally:
+
+```
+/help-me-read
+```
+
+(This needs the Gmail label set up, and a harness whose scheduled runs can
+reach your Gmail connector.)
 
 ### For coding agents
 
@@ -80,7 +120,8 @@ If you're an AI agent and your user asked you to set this up:
    handle their credentials) and creating the `help-me-read` label in their
    Gmail. Everything else you can do directly.
 5. When setup completes, deploy the empty reader so your user immediately
-   sees their site live, then invite them to paste their first link.
+   sees their site live, then invite them to try `/help-me-read` with their
+   first link.
 
 ## How it works
 
