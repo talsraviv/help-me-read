@@ -16,6 +16,13 @@ emails.
 
 ## Quickstart
 
+The easiest way: paste this to Claude Code (or any coding agent):
+
+> Set this up for me: https://github.com/talsraviv/help-me-read
+
+Your agent will clone it, install the skill, and walk you through the couple
+of things only you can do (about two minutes). Prefer to do it by hand?
+
 ```bash
 # 1. Clone
 git clone https://github.com/talsraviv/help-me-read.git ~/help-me-read
@@ -26,11 +33,30 @@ ln -s ~/help-me-read ~/.claude/skills/help-me-read
 # 3. In Claude Code, paste a YouTube link and say "help me read this"
 ```
 
-That's it. The first run detects a fresh install and walks you through
+Either way, the first run detects a fresh install and walks you through
 everything else: checking dependencies (`python3`, `yt-dlp`, `node`), picking
 your site's address (a free `*.surge.sh` subdomain), and the optional extras.
 After that, every invocation is fully autonomous — paste links, get a
 deployed site.
+
+### For coding agents
+
+If you're an AI agent and your user asked you to set this up:
+
+1. Clone this repo to a stable path (e.g. `~/help-me-read` — avoid
+   Dropbox/iCloud-synced folders) and symlink it into the skills directory:
+   `ln -s ~/help-me-read ~/.claude/skills/help-me-read` (adapt the target
+   for your harness's skills location).
+2. Run `bash ~/help-me-read/scripts/doctor.sh` — it prints a JSON report of
+   required and optional dependencies plus config state. Help your user
+   install whatever is missing.
+3. Follow the "First run on this machine?" section of `SKILL.md` — it is
+   written for you and covers the rest of setup conversationally.
+4. Two steps belong to the human, not you: running `npx surge login` (never
+   handle their credentials) and creating the `help-me-read` label in their
+   Gmail. Everything else you can do directly.
+5. When setup completes, deploy the empty reader so your user immediately
+   sees their site live, then invite them to paste their first link.
 
 ## How it works
 
