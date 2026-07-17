@@ -10,13 +10,19 @@ private git repo, kept in sync across machines through its own remote.
 
 ## New machine — one-time bootstrap
 
-    # Simplest: clone straight into your agent's skills directory
+    # Simplest: clone straight into your agent harness's skills directory —
+    # ~/.claude/skills (Claude Code), ~/.codex/skills (Codex CLI), or your
+    # harness's equivalent:
     git clone https://github.com/<you>/help-me-read.git ~/.claude/skills/help-me-read
 
     # …or, to keep the code with your other projects (nicer for hacking on it),
     # clone anywhere and symlink it in — the skill works identically:
     #   git clone https://github.com/<you>/help-me-read.git ~/help-me-read
     #   ln -s ~/help-me-read ~/.claude/skills/help-me-read
+
+    # Use more than one harness? ONE clone, symlinked into each skills folder
+    # (the library lives inside the clone; two clones = two split libraries):
+    #   ln -s ~/.claude/skills/help-me-read ~/.codex/skills/help-me-read
 
     # Then invoke the skill in your agent — the first run walks you through the
     # rest (dependency check, picking your site's address, optional Gmail

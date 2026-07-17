@@ -22,13 +22,27 @@ The easiest way: paste this to your coding agent:
 
 Your agent will clone it, install the skill, and walk you through the couple
 of things only you can do (about two minutes). Prefer to do it by hand?
-Installing is just cloning into your agent's skills directory:
+Installing is just cloning into your agent harness's skills directory:
 
 ```bash
+# Claude Code
 git clone https://github.com/talsraviv/help-me-read.git ~/.claude/skills/help-me-read
+
+# Codex CLI
+git clone https://github.com/talsraviv/help-me-read.git ~/.codex/skills/help-me-read
+
+# other harnesses: clone into wherever yours discovers skills
 ```
 
 Then paste a YouTube link to your agent and say "help me read this".
+
+**Use more than one harness?** Clone once, then symlink the same folder into
+the other's skills directory — your reading library lives inside the clone,
+so two separate clones would mean two separate libraries:
+
+```bash
+ln -s ~/.claude/skills/help-me-read ~/.codex/skills/help-me-read
+```
 
 Planning to customize the skill, or keep your own fork evolving? Clone it
 wherever you keep projects and symlink it in instead — it works identically,
@@ -36,7 +50,7 @@ and the code lives where you like to edit:
 
 ```bash
 git clone https://github.com/talsraviv/help-me-read.git ~/help-me-read
-ln -s ~/help-me-read ~/.claude/skills/help-me-read
+ln -s ~/help-me-read ~/.claude/skills/help-me-read   # and/or ~/.codex/skills/…
 ```
 
 Either way, the first run detects a fresh install and walks you through
@@ -49,11 +63,14 @@ deployed site.
 
 If you're an AI agent and your user asked you to set this up:
 
-1. Clone this repo straight into the skills directory
-   (`git clone https://github.com/talsraviv/help-me-read.git ~/.claude/skills/help-me-read`,
-   adapting the path to your harness). If your user wants to customize the
-   skill, clone it where they keep projects and symlink it in instead.
-   Avoid Dropbox/iCloud-synced folders — file sync can corrupt `.git`.
+1. Clone this repo straight into your skills directory —
+   `~/.claude/skills/help-me-read` (Claude Code), `~/.codex/skills/help-me-read`
+   (Codex CLI), or your harness's equivalent. If your user wants to customize
+   the skill, clone it where they keep projects and symlink it in instead.
+   If they use multiple harnesses, keep ONE clone and symlink it into the
+   others' skills folders — the reading library lives inside the clone, so
+   separate clones would split it. Avoid Dropbox/iCloud-synced folders —
+   file sync can corrupt `.git`.
 2. Run `bash ~/help-me-read/scripts/doctor.sh` — it prints a JSON report of
    required and optional dependencies plus config state. Help your user
    install whatever is missing.

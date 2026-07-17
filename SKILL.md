@@ -23,10 +23,11 @@ url.
 
 ### Locate the reader (run this first, from anywhere)
 
-    REPO="$(cd ~/.claude/skills/help-me-read 2>/dev/null && pwd -P)" || REPO="$(cd ~/.claude/skills/help-me-read-youtube 2>/dev/null && pwd -P)" || REPO="$(git rev-parse --show-toplevel)"
+    REPO="$(cd ~/.claude/skills/help-me-read 2>/dev/null && pwd -P)" || REPO="$(cd ~/.codex/skills/help-me-read 2>/dev/null && pwd -P)" || REPO="$(git rev-parse --show-toplevel)"
 
-(The second path is the skill's pre-rename name, still resolving on machines
-that installed before the rename.)
+(Those are the common skills locations — Claude Code's and Codex CLI's; on a
+harness with a different skills folder, resolve the repo from this file's own
+location.)
 
 If that resolves to nothing, the skill isn't installed on this machine —
 bootstrap per `SETUP.md` (clone + symlink), then re-resolve. Invoke every
@@ -76,6 +77,11 @@ one time the skill is conversational rather than autonomous:
    create a PRIVATE repo (`gh repo create <user>/help-me-read-data --private`)
    and add it as `origin` of `data/`. If not, skip — everything stays local
    and this too can be enabled later.
+5. **Ask if they use more than one agent harness** (e.g. both Claude Code
+   and Codex). The repo must exist ONCE — symlink this same clone into each
+   other harness's skills folder (`ln -s "$REPO" ~/.codex/skills/help-me-read`,
+   or that harness's equivalent path). Two separate clones would mean two
+   separate reading libraries.
 
 Then continue with the normal workflow below (or, if nothing was pasted,
 finish by deploying the empty reader so the user sees their site live).
