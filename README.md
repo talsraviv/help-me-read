@@ -101,6 +101,10 @@ entire prompt of the scheduled task is literally:
 /help-me-read
 ```
 
+Here's the author's real daily routine — note the Instructions field:
+
+![a daily scheduled task whose entire instruction is /help-me-read](docs/routine.png)
+
 (This needs the Gmail label set up, and a harness whose scheduled runs can
 reach your Gmail connector.)
 
