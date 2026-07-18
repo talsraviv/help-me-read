@@ -101,7 +101,7 @@ entire prompt of the scheduled task is literally:
 /help-me-read
 ```
 
-Here's the author's real daily routine — note the Instructions field:
+Here's the author's real daily routine:
 
 ![a daily scheduled task whose entire instruction is /help-me-read](docs/routine.png)
 
