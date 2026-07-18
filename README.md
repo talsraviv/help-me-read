@@ -34,11 +34,18 @@ git clone https://github.com/talsraviv/help-me-read.git ~/.codex/skills/help-me-
 # other harnesses: clone into wherever yours discovers skills
 ```
 
-Then tell your agent:
+Then, in a fresh agent session (skills are discovered at session start),
+tell your agent:
 
 ```
 /help-me-read [youtube url]
 ```
+
+That first call is the setup: the skill notices the fresh install and walks
+you through everything — dependency check (`python3`, `yt-dlp`, `node`),
+picking your site's address (a free `*.surge.sh` subdomain), the optional
+extras — then processes your link and deploys. About two minutes, once per
+machine. Every call after that is fully autonomous.
 
 **Use more than one harness?** Clone once, then symlink the same folder into
 the other's skills directory — your reading library lives inside the clone,
@@ -57,10 +64,8 @@ git clone https://github.com/talsraviv/help-me-read.git ~/help-me-read
 ln -s ~/help-me-read ~/.claude/skills/help-me-read   # and/or ~/.codex/skills/…
 ```
 
-Either way, the first run detects a fresh install and walks you through
-everything else: checking dependencies (`python3`, `yt-dlp`, `node`), picking
-your site's address (a free `*.surge.sh` subdomain), and the optional extras.
-After that, every invocation is fully autonomous.
+Every install shape behaves the same — the first call runs setup, every
+later call just works.
 
 ## Ongoing use
 
