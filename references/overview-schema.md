@@ -24,6 +24,11 @@ it, no markdown fences):
 Field rules:
 
 - Block `type` is `prose`, `quote`, or `figure` — nothing else.
+- All text is plain text, rendered exactly as written — the reader has no
+  markdown pass, so `**bold**` and `*italics*` show up as literal asterisks
+  on the page. Write emphasis with word choice and sentence structure
+  instead. (Well-formed emphasis pairs are stripped automatically at merge
+  as a safety net.)
 - **Videos:** every quote's `start` is the transcript timestamp (seconds,
   integer) where those words are said — take it from the `[seconds]` markers
   in the brief's transcript. `qa[].start` is where the question is asked.

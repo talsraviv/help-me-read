@@ -10,12 +10,61 @@ page.
 
 Prints {"ok": true, ...} or {"ok": false, "errors": [...]} (exit 3).
 """
-import argparse, json, os, sys
+import argparse, json, os, re, sys
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 from archive import write_json_atomic
 
 BLOCK_TYPES = ("prose", "quote", "figure")
+
+# The reader renders overview text verbatim (HTML-escaped, no markdown pass),
+# so **bold**/*italics* markers reach the page as literal asterisks. Strip
+# well-formed pairs from every prose-rendered field; quote text is never
+# touched — it must stay verbatim for check_quotes.py. The lookarounds keep
+# literal asterisks that aren't emphasis (e.g. "deep**3", "2*3") intact.
+_BOLD = re.compile(r"(?<![\w*])\*\*(?!\s)([^*]+?)(?<!\s)\*\*(?![\w*])")
+_ITALIC = re.compile(r"(?<![\w*])\*(?!\s)([^*]+?)(?<!\s)\*(?![\w*])")
+
+
+def strip_emphasis(text):
+    prev = None
+    while text != prev:  # nested cases: **bold with *italics* inside**
+        prev = text
+        text = _ITALIC.sub(r"\1", _BOLD.sub(r"\1", text))
+    return text
+
+
+def sanitize_emphasis(ov):
+    """Strip markdown emphasis from an overview's prose-rendered fields
+    in place. Returns the number of fields changed."""
+    changed = 0
+
+    def fix(obj, key):
+        nonlocal changed
+        v = obj.get(key)
+        if isinstance(v, str):
+            s = strip_emphasis(v)
+            if s != v:
+                obj[key] = s
+                changed += 1
+
+    def fix_blocks(blocks):
+        for b in blocks or []:
+            if isinstance(b, dict):
+                if b.get("type") == "prose":
+                    fix(b, "text")
+                elif b.get("type") == "figure":
+                    fix(b, "caption")
+
+    for sec in ov.get("sections") or []:
+        if isinstance(sec, dict):
+            fix(sec, "heading")
+            fix_blocks(sec.get("blocks"))
+    for qa in ov.get("qa") or []:
+        if isinstance(qa, dict):
+            fix(qa, "question")
+            fix_blocks(qa.get("answer"))
+    return changed
 
 
 def _is_num(v):
@@ -159,6 +208,7 @@ def main():
         sys.exit(3)
 
     item["overview"] = payload["overview"]
+    stripped = sanitize_emphasis(item["overview"])
     item["moments"] = payload.get("moments", [])
     for m in item["moments"]:
         m.setdefault("frames", [])
@@ -168,7 +218,8 @@ def main():
                    for b in sec.get("blocks") or []
                    if isinstance(b, dict) and b.get("type") == "quote")
     print(json.dumps({"ok": True, "id": item.get("id"), "figures": n_figures,
-                      "quotes": n_quotes, "moments": len(item["moments"])}))
+                      "quotes": n_quotes, "moments": len(item["moments"]),
+                      "emphasis_stripped": stripped}))
 
 
 if __name__ == "__main__":

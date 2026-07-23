@@ -87,3 +87,26 @@ def test_cli_rejects_invalid_payload_without_touching_item(tmp_path):
     assert r.returncode == 3
     assert not json.loads(r.stdout)["ok"]
     assert json.loads(item_path.read_text()) == original
+
+
+def test_markdown_emphasis_is_stripped_from_prose_fields():
+    from merge_overview import sanitize_emphasis, strip_emphasis
+    ov = {"sections": [{"heading": "*h*", "blocks": [
+              {"type": "prose", "text": "**Bold lead.** Stays *plain*, nested **a *b* c**."},
+              {"type": "quote", "text": "verbatim **quote**", "start": 3},
+              {"type": "figure", "svg": "<svg/>", "caption": "**cap**"}]}],
+          "qa": [{"question": "why *before*?", "answer": [
+              {"type": "prose", "text": "b *c*"}]}]}
+    n = sanitize_emphasis(ov)
+    blocks = ov["sections"][0]["blocks"]
+    assert blocks[0]["text"] == "Bold lead. Stays plain, nested a b c."
+    assert blocks[1]["text"] == "verbatim **quote**"  # quotes stay verbatim
+    assert blocks[2]["caption"] == "cap"
+    assert ov["sections"][0]["heading"] == "h"
+    assert ov["qa"][0]["question"] == "why before?"
+    assert ov["qa"][0]["answer"][0]["text"] == "b c"
+    assert n == 5
+    # literal asterisks that aren't emphasis pairs survive untouched
+    assert strip_emphasis("mode 'deep**3' vs 'deep**3', and 2*3") == \
+        "mode 'deep**3' vs 'deep**3', and 2*3"
+    assert strip_emphasis("a * b * c") == "a * b * c"
